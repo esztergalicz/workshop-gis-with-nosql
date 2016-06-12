@@ -205,3 +205,36 @@ In the second {} we insert the properties.name field too, so that it shows up in
             doc_j = json.dumps(doc, default=json_util.default)
             docs_osm.append(doc_j)
 ```
+3.d) Add the 4 new layer to the last row:
+`'data_tw': docs_tw, 'data_fb': docs_fb, 'data_fs' : docs_fs, 'data_osm': docs_osm, `
+So this is the result:   
+```Python
+ return render(request, 'mapsite/header.html', { 'data_tw': docs_tw, 'data_fb': docs_fb, 'data_fs' : docs_fs, 'data_osm': docs_osm, 'data_allpubs':docs_allpubs})
+ ```
+#####4. Task: Restrict the pubs to walking distance for the newly created layers as well    
+4.a) To be able to query multiple conditions we will need the $and operator. This is how it works:     
+`$and: [{query1}, {query2}]`
+So for example the query for OSM will look like this:     
+```Python
+        {
+            '$and': [
+                {
+                    'properties.amenity': {
+                        '$exists': True
+                    }
+                },
+                {
+                    'geometry': {
+                        '$near' : {
+                            '$geometry': {
+                                'type': "Point" ,
+                                'coordinates':  coord
+                            } , 
+                            '$maxDistance': 500 
+                        }
+                    }
+                }
+            ]
+        }
+```
+ 
