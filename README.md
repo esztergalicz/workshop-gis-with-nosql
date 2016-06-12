@@ -5,7 +5,7 @@
 The aim of this hands-on session is to gain first experience with MongoDB, create basic geo-queries and visualize documents from MongoDB on a webmap (in this case OpenLayers). We will use data about pubs in Helsinki, collected from social media (Facebook, Foursquare and Twitter) and OSM.
 
 So here is your task:
-####Find the best pub near the conference locaiton!
+####Find the best pub near the conference location!
 
 ## Part I
 ### 1. Fire up MongoDB
