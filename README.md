@@ -306,7 +306,96 @@ But the problem is, only Foursquare has information about the quality of the pub
 
 ## Part II - Working with Twitter data
 
-Open PyCharm or Notepad++ and create a new Python file. Let's call it count_tweets.py    
+Below you can find the code for the query which counts the tweets in each pub. If you want to skip creating the code by yourself you can just open count_tweets.py with PyCharm and run it or
+open a cmd where count_tweets.py is located and type    
+`python count_tweets.py`
+this has created a new collection called 'smallarea', where each pub has a new field called 'tweet_count'. To make use of this new field skip to Task 2.     
 
+#####1. Task: create a new collection with pubs within 500m and add a new field called 'tweet_count' which contains the number of tweets in a given pub.    
+1.a) Open PyCharm or Notepad++ and create a new Python file. Let's call it select_smallarea.py    
+In this first step we are going to create a new collection     
+Import the libraries    
 
+```Python
+import json
+import pymongo
+```
+Create a connection to MongoDB     
+```Python
+conn = pymongo.MongoClient()
+```
+Specify which databse you want to connect to. In our case it is the 'pubs' database    
+```Python
+db = conn.pubs
+```
+Write the query which finds all pubs within 500 meter to the conference location    
+```Python
+allpubs_near = db.allpubs.find({'geometry': { '$near' : { '$geometry': {'type': "Point" , 'coordinates':  [24.9495854, 60.1694509]} , '$maxDistance': 500 }}})
+```
+Insert each document the query found into a new collection called 'smallarea'
+```Python
+for pub in allpubs_near:
+     db.smallarea.insert(pub)
+```
+Create the 2dsphere index for the new collection
+```Python
+db.smallarea.ensure_index([("geometry", pymongo.GEOSPHERE)])
+```
+Close the connection
+```Python
+conn.close()
+```
+1.b) Create a new Python file called tweets_count.py
+Import the libraries and create the connection to MongoDB:     
 
+```Python
+import json
+import pymongo
+
+conn = pymongo.MongoClient()
+db = conn.pubs
+```
+Now write a query which finds all documents in the smallarea collection which are not tweets (hence do not have the field 'user')     
+```Python
+pubs = db.smallarea.find({'properties.user': { '$exists': False }})
+```
+Now for each of these pubs count the number of tweets within 50m:
+```Python
+for pub in pubs:
+    tweetcount = db.smallarea.count({'$and': [
+        {'properties.user': { '$exists': True}},
+        {"geometry": {"$near":
+                            {"$geometry": {
+                                "type": "Point" ,
+                                "coordinates": [ pub['geometry']['coordinates'][0] , pub['geometry']['coordinates'][1]  ]
+                                },
+                             "$maxDistance": 50,
+                             "$minDistance": 0
+                            }
+                        }
+        }
+    ]})
+```
+Then update each of these documents with a new field 'tweet_count' and as a value set number of tweets counted in the previous step:    
+```Python
+db.smallarea.update({'_id' : pub['_id']},{"$set": {'properties.tweet_count': tweetcount}}, upsert=False)
+```
+Close the connection:
+```Python
+conn.close()
+```
+#####2. Task: Switch back to views.py and add the new collection 'smallarea' after the existing layers     
+```Python
+Data_ptr_smallarea = db.smallarea.find({'properties.tweet_count': { '$exists': True}}, {'geometry.coordinates': 1, '_id': 0, 'properties.name': 1, 'properties.tweet_count': 1})
+```
+Convert the pointer to list of JSON documents:
+```Python
+docs_smallarea =[]
+    for doc in Data_ptr_smallarea:
+            doc_j = json.dumps(doc, default=json_util.default)
+            docs_smallarea.append(doc_j)
+```
+Don't forget to add the smallarea documents to the last line:
+```Python
+'data_smallarea':docs_smallarea
+```
