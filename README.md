@@ -308,7 +308,7 @@ But the problem is, only Foursquare has information about the quality of the pub
 
 Below you can find the code for the query which counts the tweets in each pub. If you want to skip creating the code by yourself you can just open count_tweets.py with PyCharm and run it or
 open a cmd where count_tweets.py is located and type    
-`python count_tweets.py`
+`python count_tweets.py`    
 this has created a new collection called 'smallarea', where each pub has a new field called 'tweet_count'. To make use of this new field skip to Task 2.     
 
 #####1. Task: create a new collection with pubs within 500m and add a new field called 'tweet_count' which contains the number of tweets in a given pub.    
