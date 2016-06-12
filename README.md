@@ -69,6 +69,29 @@ We will now edit the views.py and write some queries to load the features from t
 #####1. Task: visualize all pubs from the 'allpubs' collection
 Open views.py (either with pycharm or with notepad++)
 If you are using Notepad++ please change the following setting first:
-Settings --> Preferences --> Tab Settings --> Tab size: 4    
-Replace by space
-1. 
+>Settings --> Preferences --> Tab Settings --> Tab size: 4    
+> - [x] Replace by space     
+During the following steps please make sure that the identation is correct! Either copy the spaces at the beginning of the lines too or type 4 spaces before inserting.    
+
+1.a Go to the section `#Connecting to MongoDB ` and copy the following below this section:     
+```Python
+    db = pymongo.MongoClient().pubs #this is where we declare which database to connect to
+```
+1.b Skip to the section `#Reading the data from MongoDB` and copy the following:     
+```Python
+    Data_ptr_allpubs = db.allpubs.find({}, {'geometry.coordinates': 1})
+```    
+1.c Now go to the section `#Transformation of the single documents to a JSON-List`    
+   Here we will convert the dictionary to a list of JSON documents    
+```Python
+    docs_allpubs =[]
+    for doc in Data_ptr_allpubs:
+        doc_j = json.dumps(doc, default=json_util.default)
+        docs_allpubs.append(doc_j)
+```
+1.d Now we will specify what to send to our html file in the `Shows the header.html and sends the JSON-List as 'mdb_data'` section. Insert `‘data_allpubs’: docs_allpubs` in the curly brackets :    
+```Python
+    return render(request, 'mapsite/header.html', { ‘data_allpubs’: docs_allpubs})
+```
+Save the file and reload the map in the browser. Now a lot of black markers should have appeared. If you zoom out, you will see that there are markers all over the country. We are however only interested in pubs near the conference location so let’s make a query which finds only the near pubs.    
+#####2. Task: Visualize only the pubs which are in walking distance to our location
