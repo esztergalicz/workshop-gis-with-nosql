@@ -66,13 +66,13 @@ Now we have a map with only the conference location.
 We will now edit the views.py and write some queries to load the features from the database    
 
 ### 3. Visualizing MongoDB documents on the map
-#####1. Task: visualize all pubs from the 'allpubs' collection
+#####1. Task: Visualize all pubs from the 'allpubs' collection
 Open views.py (either with pycharm or with notepad++)
 If you are using Notepad++ please change the following setting first:
 >Settings --> Preferences --> Tab Settings --> Tab size: 4    
 > - [x] Replace by space    
 
-During the following steps please make sure that the identation is correct! Either copy the spaces at the beginning of the lines too or type 4 spaces before inserting.    
+During the following steps please make sure that the identation is correct! Either copy the spaces at the beginning of the lines too or type 4 spaces before inserting. 
 
 1.a) Go to the section `#Connecting to MongoDB ` and copy the following below this section:     
 ```Python
@@ -94,5 +94,114 @@ During the following steps please make sure that the identation is correct! Eith
 ```Python
     return render(request, 'mapsite/header.html', { ‘data_allpubs’: docs_allpubs})
 ```
-Save the file and reload the map in the browser. Now a lot of black markers should have appeared. If you zoom out, you will see that there are markers all over the country. We are however only interested in pubs near the conference location so let’s make a query which finds only the near pubs.    
-#####2. Task: Visualize only the pubs which are in walking distance to our location
+Save the file and reload the map in the browser. Hover over blue OpenLayers icon in the upper right corner and switch on the 'all pubs' layer. Now a lot of black markers should have appeared. If you zoom out, you will see that there are markers all over the country. We are however only interested in pubs near the conference location so let’s make a query which finds only the near pubs.    
+
+#####2. Task: Visualize only the pubs which are in walking distance to our location    
+2.a) In the previous task we have left the first {} empty. This is where our query goes:
+```Python
+'geometry': {
+                '$near' : {
+                    '$geometry': {
+                        'type': "Point" ,
+                        'coordinates':  coord
+                    } , 
+                '$maxDistance': 10000 
+                }
+            }
+```
+So the whole query looks like this:    
+```Python
+    Data_ptr_allpubs = db.allpubs.find({
+            'geometry': {
+                '$near' : {
+                    '$geometry': {
+                        'type': "Point" ,
+                        'coordinates':  coord
+                    } , 
+                '$maxDistance': 500 
+                }
+            }
+        }, 
+        {'geometry.coordinates': 1}
+    )
+```
+Save the file and refresh the map. Now the markers should appear only within Helsinki.
+#####3. Task: Create 4 layers for the 4 document types (Twitter, Facebook, Foursquare & OSM)    
+3.a) For this we have to analyze the data: which fields are unique in each collection?    
+3.b) For each layer we will use this field to query based on its existence   
+```Python
+    Data_ptr_fs = db.allpubs.find(
+        {
+            'properties.rating': { 
+                    '$exists': True
+            }
+        }, 
+        {
+            'geometry.coordinates': 1,
+            'properties.name': 1
+        }
+    )
+```
+
+In the second {} we insert the properties.name field too, so that it shows up in the popup for the marker. Now paste the remaining 3 layers too:
+```Python
+    Data_ptr_tw = db.allpubs.find(
+        {
+            'properties.user': {
+                '$exists': True
+            }
+        }, 
+        {
+            'geometry.coordinates': 1,
+            '_id': 0, 'properties.user': 1 
+        }
+    )
+    
+    Data_ptr_fb = db.allpubs.find(
+        {
+            'properties.category_list': {
+                '$exists': True
+            }
+        },
+        {
+            'geometry.coordinates': 1,
+            'properties.name':1
+        }
+    )
+
+    Data_ptr_osm = db.allpubs.find(
+        {
+            'properties.amenity': {
+                '$exists': True
+            }
+        }, 
+        {
+            'geometry.coordinates': 1,
+            'properties.name': 1
+        }
+    )
+```
+3.c) Paste the following code to the JSON-List section:
+```Python
+    docs_tw = []
+    #Transformation of the single documents to a JSON-List
+    for doc in Data_ptr_tw:
+        doc_j = json.dumps(doc, default=json_util.default)
+        docs_tw.append(doc_j)
+
+    docs_fb =[]
+    for doc in Data_ptr_fb:
+            doc_j = json.dumps(doc, default=json_util.default)
+            docs_fb.append(doc_j)
+	
+    docs_fs =[]
+    for doc in Data_ptr_fs:
+            doc_j = json.dumps(doc, default=json_util.default)
+            docs_fs.append(doc_j)
+
+			
+    docs_osm =[]
+    for doc in Data_ptr_osm:
+            doc_j = json.dumps(doc, default=json_util.default)
+            docs_osm.append(doc_j)
+```
