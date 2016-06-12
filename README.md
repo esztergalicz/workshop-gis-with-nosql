@@ -72,7 +72,7 @@ If you are using Notepad++ please change the following setting first:
 >Settings --> Preferences --> Tab Settings --> Tab size: 4    
 > - [x] Replace by space    
 
-During the following steps please make sure that the identation is correct! Either copy the spaces at the beginning of the lines too or type 4 spaces before inserting. 
+During the following steps please make sure that the identation is correct! Either copy the spaces at the beginning of the lines too or type 4 spaces before inserting. You can check whether there is a problem in the commander window where manage.py runs. If it still ends with the line  ```Quit the server with CTRL-BREAK.```   then everything is Ok. Otherwise it will tell you in which line the error is.
 
 1.a) Go to the section `#Connecting to MongoDB ` and copy the following below this section:     
 ```Python
@@ -82,6 +82,7 @@ During the following steps please make sure that the identation is correct! Eith
 ```Python
     Data_ptr_allpubs = db.allpubs.find({}, {'geometry.coordinates': 1})
 ```    
+This is a pointer to the collection. The first {} section says load all documents (as it is left empty), and the second one says send back only the coordinates field of the document. 
 1.c) Now go to the section `#Transformation of the single documents to a JSON-List`    
    Here we will convert the dictionary to a list of JSON documents    
 ```Python
@@ -153,7 +154,7 @@ In the second {} we insert the properties.name field too, so that it shows up in
         }, 
         {
             'geometry.coordinates': 1,
-            '_id': 0, 'properties.user': 1 
+            'properties.user': 1 
         }
     )
     
@@ -237,4 +238,6 @@ So for example the query for OSM will look like this:
             ]
         }
 ```
- 
+4.b) 2.	For foursquare, in the list of fields insert “properties.rating” as well. 
+4.c) Save the file and refresh the map
+
