@@ -212,6 +212,7 @@ So this is the result:
 ```Python
  return render(request, 'mapsite/header.html', { 'data_tw': docs_tw, 'data_fb': docs_fb, 'data_fs' : docs_fs, 'data_osm': docs_osm, 'data_allpubs':docs_allpubs})
  ```
+ If you refresh the map, you should see 3 colours. To be able to look at the twitter data, switch on the twitter layer in the upper right corner.
 #####4. Task: Restrict the pubs to walking distance for the newly created layers as well    
 4.a) To be able to query multiple conditions we will need the $and operator. This is how it works:     
 `$and: [{query1}, {query2}]`
@@ -238,6 +239,21 @@ So for example the query for OSM will look like this:
             ]
         }
 ```
-4.b) 2.	For foursquare, in the list of fields insert “properties.rating” as well. 
-4.c) Save the file and refresh the map
+4.b) 2.	For foursquare, in the list of fields insert “properties.rating” as well.     
+4.c) Save the file and refresh the map     
+Okay, so now we have a map with pubs within walking distance. If you click on the markers, you will see some information on the name of the pub, the source of the data and in case of foursquare the rating as well. We could refine the query once more, so that only the pubs show up which have better rating than 9. So within the list of conditions for the field 'properties.rating' we insert a new one:
+```Python
+                    'properties.rating': { 
+                        '$exists': True,
+                        '$gt': 9.1
+                    }
+```
+
+But the problem is, only Foursquare has information about the quality of the pubs. So in partII we will take a different approach: we will go ahead and assume that the more it was tweeted from a pub, the better it is. 
+
+## Part II - Working with Twitter data
+
+Open PyCharm or Notepad++ and create a new Python file. Let's call it count_tweets.py    
+
+
 
