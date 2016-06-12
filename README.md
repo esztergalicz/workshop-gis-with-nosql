@@ -13,20 +13,20 @@ So here is your task:
 2. To check what‘s in the database we will work with the mongo console    
 Start a cmd from `C:\MongoDB\Server\3.2\bin\` (Shift+right-click in the folder --> Open command window here)
 & type   
-``` >mongo ```    
+``` mongo ```    
 you can ignore the warnings    
 3. To list all databases type    
-     ``` >show dbs ```   
+     ``` show dbs ```   
 4. To switch to a database type    
-     ``` >use pubs ```   
+     ``` use pubs ```   
 5. To show all collections in the database type  
-     ``` >show collections ```
+     ``` show collections ```
 6. To show a document from the collection (e.g. 'osm') type  
-``` >db.osm.findOne() ```
+``` db.osm.findOne() ```
 7. Let’s take a look at all 4 collections! (Ignore 'allpubs' for now.) Try to find the coordinates of the location in each document.         
-     ``` >db.facebook.findOne() ```  
-     ``` >db.foursquare.findOne()   ```   
-     ``` >db.twitter.findOne()     ```
+     ``` db.facebook.findOne() ```  
+     ``` db.foursquare.findOne()   ```   
+     ``` db.twitter.findOne()     ```
     
 See how they all have a different structure?     
 To be able to easily work with them, they were all converted to GeoJSON format and loaded in the ‘allpubs’ collection. 
@@ -35,7 +35,7 @@ If you are interested how this is done, you can look it up in `Downloads\python\
 
 Converting to GeoJSON has another upside: this way a 2dspehere index could be added which enables the geo-queries.    
 This is how a geospatial index is added (e.g. for the 'facebook' collection):    
- ``` >db.facebook.createIndex( { "geo" : "2dsphere" } ) ```      
+ ``` db.facebook.createIndex( { "geo" : "2dsphere" } ) ```      
  This should be the output:    
  ```JSON
  {
@@ -62,28 +62,27 @@ Now we have a map with only the conference location.
   2.	The html file is in `map\mapsite\templates\mapsite\header.html`
   3.	The javascript file for the OpenLayers map is in `map\mapsite\static\js`
   4.	Css & images are also in the static folder
-  5.	The connection to the database is made in the `map\mapsite\views.py` file
-We will now edit the views.py and write some queries to load the features from the database    
+  5.	The connection to the database is made in the `map\mapsite\views.py` file     
+We will now edit the `views.py` and write some queries to load the features from the database    
 
 ### 3. Visualizing MongoDB documents on the map
 #####1. Task: Visualize all pubs from the 'allpubs' collection
-Open views.py (either with pycharm or with notepad++)
-If you are using Notepad++ please change the following setting first:
+Open `views.py` (either with PyCharm (this might be slow) or with Notepad++)
+If you are using Notepad++ please replace the tabs by 4 spaces:
 >Settings --> Preferences --> Tab Settings --> Tab size: 4    
-> - [x] Replace by space    
+> - [x] **Replace by space**    
+> (If you work locally and use Notepad++ often, then please do not forget to change this back after the workshop!)
 
 During the following steps please make sure that the identation is correct! Either copy the spaces at the beginning of the lines too or type 4 spaces before inserting. You can check whether there is a problem in the commander window where manage.py runs. If it still ends with the line  ```Quit the server with CTRL-BREAK.```   then everything is Ok. Otherwise it will tell you in which line the error is.
 
-1.a) Go to the section `#Connecting to MongoDB ` and copy the following below this section:     
-```Python
-    db = pymongo.MongoClient().pubs #this is where we declare which database to connect to
-```
-1.b) Skip to the section `#Reading the data from MongoDB` and copy the following:     
+1.a) Go to the section `#Reading the data from MongoDB` and copy the following:     
 ```Python
     Data_ptr_allpubs = db.allpubs.find({}, {'geometry.coordinates': 1})
 ```    
-This is a pointer to the collection. The first {} section says load all documents (as it is left empty), and the second one says send back only the coordinates field of the document. 
-1.c) Now go to the section `#Transformation of the single documents to a JSON-List`    
+This is a pointer to the collection.     
+The first {} section says load all documents (as it is left empty), this is where we will write the conditions later.     
+The second {} defines which fields of the document should be returned. `1`means the returned documents are sorted in ascending order. `-1` would mean descending order.   
+1.b) Now go to the section `#Transformation of the single documents to a JSON-List`    
    Here we will convert the dictionary to a list of JSON documents    
 ```Python
     docs_allpubs =[]
@@ -91,14 +90,14 @@ This is a pointer to the collection. The first {} section says load all document
         doc_j = json.dumps(doc, default=json_util.default)
         docs_allpubs.append(doc_j)
 ```
-1.d) Now we will specify what to send to our html file in the `Shows the header.html and sends the JSON-List as 'mdb_data'` section. Insert `‘data_allpubs’: docs_allpubs` in the curly brackets :    
+1.c) Now we will specify what to send to our html file in the `Shows the header.html and sends the JSON-List as 'data_'` section. Insert `'data_allpubs': docs_allpubs` in the curly brackets :    
 ```Python
-    return render(request, 'mapsite/header.html', { ‘data_allpubs’: docs_allpubs})
+    return render(request, 'mapsite/header.html', { 'data_allpubs': docs_allpubs})
 ```
-Save the file and reload the map in the browser. Hover over blue OpenLayers icon in the upper right corner and switch on the 'all pubs' layer. Now a lot of black markers should have appeared. If you zoom out, you will see that there are markers all over the country. We are however only interested in pubs near the conference location so let’s make a query which finds only the near pubs.    
+Save the file and reload the map in the browser. Hover over blue OpenLayers icon in the upper right corner and switch on the 'all pubs' layer. Now a lot of black markers should have appeared. If you zoom out, you will see that there are markers all over the country. We are however only interested in pubs near the conference location so let’s make a query which finds only the nearest pubs.    
 
 #####2. Task: Visualize only the pubs which are in walking distance to our location    
-2.a) In the previous task we have left the first {} empty. This is where our query goes:
+2.a) In the previous task at `Data_ptr_allpubs` we have left the first {} empty. This is where our query goes:
 ```Python
 'geometry': {
                 '$near' : {
@@ -106,7 +105,7 @@ Save the file and reload the map in the browser. Hover over blue OpenLayers icon
                         'type': "Point" ,
                         'coordinates':  coord
                     } , 
-                '$maxDistance': 10000 
+                '$maxDistance': 500 
                 }
             }
 ```
@@ -127,10 +126,12 @@ So the whole query looks like this:
     )
 ```
 Save the file and refresh the map. Now the markers should appear only within Helsinki.
+
 #####3. Task: Create 4 layers for the 4 document types (Twitter, Facebook, Foursquare & OSM)    
 3.a) For this we have to analyze the data: which fields are unique in each collection?    
-3.b) For each layer we will use this field to query based on its existence   
+3.b) For each layer we will use this unique field to query based on its existence:   
 ```Python
+    #Foursquare
     Data_ptr_fs = db.allpubs.find(
         {
             'properties.rating': { 
@@ -143,9 +144,25 @@ Save the file and refresh the map. Now the markers should appear only within Hel
         }
     )
 ```
+This returns all documents from the 'allpubs' collection, which have a 'properties.rating' field. Ergo only the Foursquare documents.
 
-In the second {} we insert the properties.name field too, so that it shows up in the popup for the marker. Now paste the remaining 3 layers too:
+In the second {} we have inserted the properties.name field too, so that it shows up in the popup for the marker.
+Now paste all 4 layers into the `#Reading the data from MongoDB`section, after the `allpubs` layer:
 ```Python
+    #Foursquare
+    Data_ptr_fs = db.allpubs.find(
+        {
+            'properties.rating': { 
+                    '$exists': True
+            }
+        }, 
+        {
+            'geometry.coordinates': 1,
+            'properties.name': 1
+        }
+    )
+    
+    #Twitter
     Data_ptr_tw = db.allpubs.find(
         {
             'properties.user': {
@@ -158,6 +175,7 @@ In the second {} we insert the properties.name field too, so that it shows up in
         }
     )
     
+    #Facebook
     Data_ptr_fb = db.allpubs.find(
         {
             'properties.category_list': {
@@ -169,7 +187,8 @@ In the second {} we insert the properties.name field too, so that it shows up in
             'properties.name':1
         }
     )
-
+    
+    #OSM
     Data_ptr_osm = db.allpubs.find(
         {
             'properties.amenity': {
@@ -182,10 +201,10 @@ In the second {} we insert the properties.name field too, so that it shows up in
         }
     )
 ```
-3.c) Paste the following code to the JSON-List section:
+3.c) Paste the following code to the `#Transformation of the single documents to a JSON-List` section:
 ```Python
-    docs_tw = []
     #Transformation of the single documents to a JSON-List
+    docs_tw = []
     for doc in Data_ptr_tw:
         doc_j = json.dumps(doc, default=json_util.default)
         docs_tw.append(doc_j)
@@ -206,22 +225,23 @@ In the second {} we insert the properties.name field too, so that it shows up in
             doc_j = json.dumps(doc, default=json_util.default)
             docs_osm.append(doc_j)
 ```
-3.d) Add the 4 new layer to the last row:
+3.d) Add the 4 new layer to the last row, right before `'data_allpubs':docs_allpubs`:
 `'data_tw': docs_tw, 'data_fb': docs_fb, 'data_fs' : docs_fs, 'data_osm': docs_osm, `
-So this is the result:   
+This should look like this:   
 ```Python
  return render(request, 'mapsite/header.html', { 'data_tw': docs_tw, 'data_fb': docs_fb, 'data_fs' : docs_fs, 'data_osm': docs_osm, 'data_allpubs':docs_allpubs})
  ```
- If you refresh the map, you should see 3 colours. To be able to look at the twitter data, switch on the twitter layer in the upper right corner.
-#####4. Task: Restrict the pubs to walking distance for the newly created layers as well    
+ If you refresh the map, you should see 3 colours. To be able to look at the Twitter data, switch on the Twitter layer in the upper right corner.
+ 
+#####4. Task: Restrict the pubs to walking distance for the Foursquare layer as well.     
 4.a) To be able to query multiple conditions we will need the $and operator. This is how it works:     
-`$and: [{query1}, {query2}]`
-So for example the query for OSM will look like this:     
+`$and: [{condition1}, {condition2}]`
+So for example the query for Foursquare will look like this:     
 ```Python
         {
             '$and': [
                 {
-                    'properties.amenity': {
+                    'properties.rating': {
                         '$exists': True
                     }
                 },
@@ -239,13 +259,46 @@ So for example the query for OSM will look like this:
             ]
         }
 ```
-4.b) 2.	For foursquare, in the list of fields insert “properties.rating” as well.     
+This is how the whole pointer looks like:
+```Python
+
+    Data_ptr_fs = db.allpubs.find(
+        {
+            '$and': [
+                {
+                    'properties.rating': {
+                        '$exists': True
+                    }
+                },
+                {
+                    'geometry': {
+                        '$near' : {
+                            '$geometry': {
+                                'type': "Point" ,
+                                'coordinates':  coord
+                            } , 
+                            '$maxDistance': 500 
+                        }
+                    }
+                }
+            ]
+        }, 
+        {
+            'geometry.coordinates': 1,
+            'properties.name': 1,
+            'properties.rating': 1,
+            
+        }
+    )
+```
+4.b) Notice how we have inserted “properties.rating” in the list of fields as well. This is needed so the rating information appears in the popup.         
 4.c) Save the file and refresh the map     
-Okay, so now we have a map with pubs within walking distance. If you click on the markers, you will see some information on the name of the pub, the source of the data and in case of foursquare the rating as well. We could refine the query once more, so that only the pubs show up which have better rating than 9. So within the list of conditions for the field 'properties.rating' we insert a new one:
+If you want to, you could write the walking distance query for all layers.
+Okay, so now we have a map with (Foursquare-)pubs within walking distance. If you click on the markers, you will see some information on the name of the pub, the source of the data and in case of foursquare the rating as well. We could refine the query once more, so that only the pubs show up which have better rating than 8. So within the list of conditions for the field 'properties.rating' we insert a new one:
 ```Python
                     'properties.rating': { 
                         '$exists': True,
-                        '$gt': 9.1
+                        '$gt': 8
                     }
 ```
 
