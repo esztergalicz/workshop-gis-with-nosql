@@ -4,12 +4,12 @@
 
 The aim of this hands-on session is to gain first experience with MongoDB, create basic geo-queries and visualize documents from MongoDB on a webmap (in this case OpenLayers). We will use data about pubs in Helsinki, collected from social media (Facebook, Foursquare and Twitter) and OSM.
 
-If you want to look up how the data was collected you can follow these links:    
+> If you want to look up how the data was collected you can follow these links:    
 
-[Facebook](https://github.com/Merithios/DjangoMap/blob/master/Facebook/facebook_skript.py)    
-[Foursquare](https://github.com/Merithios/DjangoMap/tree/master/Foursquare)    
-[Twitter](https://github.com/Merithios/DjangoMap/blob/master/Tweets/tweets.py)    
-[OSM](http://rosslawley.co.uk/the-most-popular-pub-name/)    
+> [Facebook](https://github.com/Merithios/DjangoMap/blob/master/Facebook/facebook_skript.py)    
+> [Foursquare](https://github.com/Merithios/DjangoMap/tree/master/Foursquare)    
+> [Twitter](https://github.com/Merithios/DjangoMap/blob/master/Tweets/tweets.py)    
+> [OSM](http://rosslawley.co.uk/the-most-popular-pub-name/)    
 
 So here is your task:
 ####Find the best pub near the conference location!
