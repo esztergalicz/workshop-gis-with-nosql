@@ -4,6 +4,13 @@
 
 The aim of this hands-on session is to gain first experience with MongoDB, create basic geo-queries and visualize documents from MongoDB on a webmap (in this case OpenLayers). We will use data about pubs in Helsinki, collected from social media (Facebook, Foursquare and Twitter) and OSM.
 
+If you want to look up how the data was collected you can follow these links:    
+
+[Facebook](https://github.com/Merithios/DjangoMap/blob/master/Facebook/facebook_skript.py)    
+[Foursquare](https://github.com/Merithios/DjangoMap/tree/master/Foursquare)    
+[Twitter](https://github.com/Merithios/DjangoMap/blob/master/Tweets/tweets.py)    
+[OSM](http://rosslawley.co.uk/the-most-popular-pub-name/)    
+
 So here is your task:
 ####Find the best pub near the conference location!
 
@@ -293,8 +300,8 @@ This is how the whole pointer looks like:
 ```
 4.b) Notice how we have inserted “properties.rating” in the list of fields as well. This is needed so the rating information appears in the popup.         
 4.c) Save the file and refresh the map     
-If you want to, you could write the walking distance query for all layers.
-Okay, so now we have a map with (Foursquare-)pubs within walking distance. If you click on the markers, you will see some information on the name of the pub, the source of the data and in case of foursquare the rating as well. We could refine the query once more, so that only the pubs show up which have better rating than 8. So within the list of conditions for the field 'properties.rating' we insert a new one:
+If you want to, you can write the walking distance query for all layers.     
+Okay, so now we have a map with (Foursquare-)pubs within walking distance. If you click on the markers, you will see some information on the name of the pub, the source of the data and, in case of Foursquare, the rating as well. We can refine the query once more, so that only the best-rated pubs show (e.g. with better rating than 8). So within the list of conditions for the field 'properties.rating' we insert a new one:
 ```Python
                     'properties.rating': { 
                         '$exists': True,
@@ -302,14 +309,14 @@ Okay, so now we have a map with (Foursquare-)pubs within walking distance. If yo
                     }
 ```
 
-But the problem is, only Foursquare has information about the quality of the pubs. So in partII we will take a different approach: we will go ahead and assume that the more it was tweeted from a pub, the better it is. 
+The problem is, only Foursquare has information about the quality of the pubs. So in partII we will take a different approach: we will go ahead and assume that the more it was tweeted from a pub, the better it is. 
 
 ## Part II - Working with Twitter data
 
-Below you can find the code for the query which counts the tweets in each pub. If you want to skip creating the code by yourself you can just open count_tweets.py with PyCharm and run it or
+Below you can find the code for the query which counts the tweets in each pub. If you want to skip creating the code by yourself, you can just open count_tweets.py with PyCharm and run it or     
 open a cmd where count_tweets.py is located and type    
 `python count_tweets.py`    
-this has created a new collection called 'smallarea', where each pub has a new field called 'tweet_count'. To make use of this new field skip to Task 2.     
+This creates a new collection called 'smallarea', where each pub has a new field called 'tweet_count'. To make use of this new field skip to Task 2.     
 
 #####1. Task: create a new collection with pubs within 500m and add a new field called 'tweet_count' which contains the number of tweets in a given pub.    
 1.a) Open PyCharm or Notepad++ and create a new Python file. Let's call it select_smallarea.py    
@@ -345,6 +352,8 @@ Close the connection
 ```Python
 conn.close()
 ```
+Run the file and check in the mongo console whether the collection was created.     
+
 1.b) Create a new Python file called tweets_count.py
 Import the libraries and create the connection to MongoDB:     
 
