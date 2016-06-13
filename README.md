@@ -2,7 +2,7 @@
 
 ## Intorduction
 
-The aim of this hands-on session is to gain first experience with MongoDB, create basic geo-queries and visualize documents from MongoDB on a webmap (in this case OpenLayers). We will use data about pubs in Helsinki, collected from social media (Facebook, Foursquare and Twitter) and OSM.
+The aim of this hands-on session is to gain first experience with [MongoDB](https://www.mongodb.com/), create basic geo-queries and visualize documents from MongoDB on a webmap (in this case [OpenLayers3](http://openlayers.org/)). We will use data about pubs in Helsinki, collected from social media (Facebook, Foursquare and Twitter) and OpenStreetMap(OSM).
 
 > If you want to look up how the data was collected you can follow these links:    
 
@@ -36,13 +36,13 @@ you can ignore the warnings
      ``` db.twitter.findOne()     ```
     
 See how they all have a different structure?     
-To be able to easily work with them, they were all converted to GeoJSON format and loaded in the ‘allpubs’ collection.      
+To be able to easily work with them, they were all converted to [GeoJSON format](http://geojson.org/) and loaded in the ‘allpubs’ collection.      
 For example a Facebook document transformed to GeoJSON:
 ![GeoJSON transformation](https://raw.githubusercontent.com/geszter/workshop-gis-with-nosql/master/images/geojson.png)     
 
-If you are interested how this is done, you can look it up in [/python/](https://github.com/geszter/workshop-gis-with-nosql/tree/master/python), you will need both `create_geojson.py` & `GeoTransformer.py`    
+If you are interested how this is done, you can look it up in [/python/](https://github.com/geszter/workshop-gis-with-nosql/tree/master/python), you will need both `create_geojson.py` & `GeoTransformer.py`.    
 
-Converting to GeoJSON has another upside: this way a 2dspehere index could be added which enables the geo-queries.    
+Converting to GeoJSON has another upside: this way a [2dspehere index](https://docs.mongodb.com/manual/core/2dsphere/) could be added which enables the geo-queries.    
 This is how a geospatial index is added (e.g. for the 'facebook' collection):    
  ``` db.facebook.createIndex( { "geo" : "2dsphere" } ) ```      
  This should be the output:    
@@ -56,7 +56,7 @@ This is how a geospatial index is added (e.g. for the 'facebook' collection):
 ```
 
 ### 2. Django
-To be able to visualize the features from MongoDB on a map in the browser, we are using the django framework.    
+To be able to visualize the features from MongoDB on a map in the browser, we are using the [Django framework](https://www.djangoproject.com/).    
 1.	Start the django project 
 go to `C:\django\map` and open a cmd there
 type    
