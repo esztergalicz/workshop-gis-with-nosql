@@ -37,6 +37,8 @@ you can ignore the warnings
     
 See how they all have a different structure?     
 To be able to easily work with them, they were all converted to GeoJSON format and loaded in the ‘allpubs’ collection. 
+For example a Facebook document transformed to GeoJSON:
+![GeoJSON transformation](https://raw.githubusercontent.com/geszter/workshop-gis-with-nosql/master/images/geojson.png)
 
 If you are interested how this is done, you can look it up in `Downloads\python\create_geojson.py` & `GeoTransformer.py`    
 
