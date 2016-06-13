@@ -36,11 +36,11 @@ you can ignore the warnings
      ``` db.twitter.findOne()     ```
     
 See how they all have a different structure?     
-To be able to easily work with them, they were all converted to GeoJSON format and loaded in the ‘allpubs’ collection. 
+To be able to easily work with them, they were all converted to GeoJSON format and loaded in the ‘allpubs’ collection.      
 For example a Facebook document transformed to GeoJSON:
-![GeoJSON transformation](https://raw.githubusercontent.com/geszter/workshop-gis-with-nosql/master/images/geojson.png)
+![GeoJSON transformation](https://raw.githubusercontent.com/geszter/workshop-gis-with-nosql/master/images/geojson.png)     
 
-If you are interested how this is done, you can look it up in `Downloads\python\create_geojson.py` & `GeoTransformer.py`    
+If you are interested how this is done, you can look it up in [/python/](https://github.com/geszter/workshop-gis-with-nosql/tree/master/python), you will need both `create_geojson.py` & `GeoTransformer.py`    
 
 Converting to GeoJSON has another upside: this way a 2dspehere index could be added which enables the geo-queries.    
 This is how a geospatial index is added (e.g. for the 'facebook' collection):    
